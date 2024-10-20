@@ -2,7 +2,8 @@
 import Environment from '../shared/Environment'
 import Product from '../types/Product'
 import path from 'path'
-import fs, { promises as fspr } from 'fs'
+import { promises as fspr } from 'fs'
+import DbFunctions from '../../database/DbFunctions'
 
 export default class ProductsModel {
   public fetchMovies = async(): Promise<Product[]> => {
@@ -41,63 +42,38 @@ export default class ProductsModel {
   }
 
   public newProduct = async(product: Product): Promise<boolean> => {
-    const data = await this.productsJson()
-
-    const last = data[data.length - 1];
-    if (last) {
-      product.id = last.id + 1;
+    const res = await DbFunctions.insertProduct(product)
+    if(res){
+      return true
     }else{
-      product.id = 1;
+      return false
     }
-
-    data.push(product)
-    this.writeProductsToFile(data)
-    return true
   }
 
   public deleteProduct = async(productId: number): Promise<boolean> => {
-    const data = await this.productsJson()
-    const index = data.findIndex((p) => p.id === productId)
-    data.splice(index, 1)
-    this.writeProductsToFile(data)
-    return true
+    const res = await DbFunctions.deleteProduct(productId)
+    if(res){
+      return true
+    }else{
+      return false
+    }
   }
 
   public updateProduct = async(product: Product): Promise<boolean> => {
-    const data = await this.productsJson()
-    const index = data.findIndex((p) => p.id === product.id)
-
-    if (index === -1) {
+    const res = await DbFunctions.updateProduct(product)
+    if(res){
+      return true
+    }else {
       return false
     }
-
-    data[index] = product
-    this.writeProductsToFile(data)
-    return true
   }
 
   public async productsJson(): Promise<Product[]> {
     try {
-      const route = path.resolve(__dirname, '../../database/products.json');
-
-      const data = await fspr.readFile(route, 'utf-8');
-
-      return JSON.parse(data) as Product[];
+      return (await DbFunctions.getAllProducts()) as Product[];
     } catch (error) {
       console.error('Error:', error);
       return [];
-    }
-  }
-
-  public writeProductsToFile(data: Product[]): void {
-    const filePath = '../../database/products.json';
-    try {
-      const jsonData = JSON.stringify(data, null, 2);
-
-      fs.writeFileSync(path.resolve(__dirname, filePath), jsonData, 'utf8');
-      console.log('JSON guardado');
-    } catch (error) {
-      console.error('Error:', error);
     }
   }
 }
