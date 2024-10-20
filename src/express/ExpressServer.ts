@@ -37,7 +37,7 @@ export default class ExpressServer {
     }
 
     public start() {
-        const PORT = process.env["PORT"] || 1802;
+        const PORT = process.env["PORT"] || 80;
         const HOST = process.env["HOST"] || 'localhost';
         this.app.listen( PORT, () => {
             console.log(`Server running on http://${HOST}:${PORT}`);
