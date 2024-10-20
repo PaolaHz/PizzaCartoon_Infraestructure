@@ -22,4 +22,4 @@ COPY . .
 EXPOSE 1802
 
 # Comando para iniciar la aplicación en modo desarrollo
-CMD ["npm", "run", "dev"]
+CMD ["npx", "ts-node", "src/Server.ts"]
